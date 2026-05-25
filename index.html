@@ -579,7 +579,7 @@
       }
     </style>
   </head>
-  <body data-theme="light">
+  <body data-theme="dark">
     <div class="app-shell">
       <aside class="sidebar" aria-label="Control panel">
         <div class="sidebar-inner">
@@ -658,7 +658,7 @@
           <header class="sim-header">
             <div class="header-actions">
               <button id="pauseButton" class="header-button" type="button" aria-pressed="false">Pause</button>
-              <button id="themeToggle" class="header-button" type="button" aria-label="Enable dark mode" aria-pressed="false" title="Enable dark mode">☾</button>
+              <button id="themeToggle" class="header-button" type="button" aria-label="Enable light mode" aria-pressed="true" title="Enable light mode">☀</button>
             </div>
             <h2>Hydrogen-like Orbital</h2>
             <p id="stateTitle">n=3 l=1 m=0 · 7000 samples</p>
@@ -1234,7 +1234,7 @@
       });
 
       readState();
-      applyTheme(localStorage.getItem("atom-playground-theme") || "light");
+      applyTheme(localStorage.getItem("atom-playground-theme") || "dark");
       generateOrbital();
       drawScene();
     </script>
