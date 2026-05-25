@@ -1,0 +1,1242 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Atomic Orbital Playground</title>
+    <style>
+      :root {
+        --bottom-height: clamp(190px, 23vh, 260px);
+        color-scheme: light;
+        --blue: #1677e8;
+        --blue-dark: #0f5fbd;
+        --green: #27AE60;
+        --red: #EB5757;
+        --orange: #e87511;
+        --ink: #111827;
+        --text: #111827;
+        --muted: #4b5563;
+        --line: #dfe5ee;
+        --panel: #ffffff;
+        --page: #f6f8fb;
+        --sidebar: #fbfcfe;
+        --field-bg: #ffffff;
+        --field-border: #ccd6e1;
+        --control-bg: #ffffff;
+        --control-bg-hover: #f4f8ff;
+        --control-text: #0f5fbd;
+        --subtle-line: #edf1f6;
+        --primary-button-text: #ffffff;
+        --primary-gradient: linear-gradient(180deg, #1a83f5 0%, #0f72df 100%);
+        --primary-gradient-hover: linear-gradient(180deg, #2490ff 0%, #1069ce 100%);
+        --primary-shadow: 0 7px 16px rgba(22, 119, 232, 0.22);
+        --card-shadow: 0 3px 16px rgba(17, 24, 39, 0.04);
+        --scene-bg: #ffffff;
+        --canvas-bg: #ffffff;
+        --canvas-grid: #d8dee8;
+        --canvas-axis: #8b96a8;
+        --canvas-electron: #1677e8;
+        --canvas-electron-hot: #e87511;
+        --canvas-nucleus: #EB5757;
+        --canvas-shell: rgba(22, 119, 232, 0.16);
+        --canvas-chart: #e87511;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      body[data-theme="dark"] {
+        color-scheme: dark;
+        --bg1: #191919;
+        --bg2: #222222;
+        --primary: #5D71FC;
+        --blue: #5D71FC;
+        --blue-dark: #5D71FC;
+        --page: var(--bg1);
+        --panel: var(--bg2);
+        --sidebar: var(--bg2);
+        --scene-bg: var(--bg1);
+        --canvas-bg: var(--bg1);
+        --ink: #f8f8f8;
+        --text: #f8f8f8;
+        --muted: rgba(248, 248, 248, 0.62);
+        --line: transparent;
+        --subtle-line: transparent;
+        --field-border: transparent;
+        --field-bg: var(--bg1);
+        --control-bg: var(--bg1);
+        --control-bg-hover: var(--bg2);
+        --control-text: var(--primary);
+        --primary-button-text: #f8f8f8;
+        --primary-gradient: linear-gradient(180deg, var(--primary) 0%, var(--primary) 100%);
+        --primary-gradient-hover: linear-gradient(180deg, var(--primary) 0%, var(--primary) 100%);
+        --primary-shadow: none;
+        --card-shadow: none;
+        --canvas-grid: rgba(248, 248, 248, 0.08);
+        --canvas-axis: rgba(248, 248, 248, 0.42);
+        --canvas-electron: #5D71FC;
+        --canvas-electron-hot: #f89540;
+        --canvas-nucleus: #EB5757;
+        --canvas-shell: rgba(93, 113, 252, 0.18);
+        --canvas-chart: #f89540;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+        color: var(--text);
+        background: var(--page);
+      }
+
+      body,
+      button,
+      input {
+        font: inherit;
+      }
+
+      button,
+      input[type="range"] {
+        cursor: pointer;
+      }
+
+      .app-shell {
+        display: grid;
+        grid-template-columns: clamp(286px, 19vw, 380px) minmax(0, 1fr);
+        width: 100vw;
+        height: 100vh;
+        min-height: 620px;
+      }
+
+      .sidebar {
+        min-width: 0;
+        height: 100vh;
+        overflow-y: auto;
+        overflow-x: hidden;
+        background: var(--sidebar);
+        border-right: 1px solid var(--line);
+      }
+
+      .sidebar-inner {
+        padding: 18px 18px 22px;
+      }
+
+      .brand {
+        padding: 0 0 14px;
+      }
+
+      .brand h1 {
+        margin: 0 0 4px;
+        font-size: 24px;
+        line-height: 1.15;
+        font-weight: 800;
+      }
+
+      .brand p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 18px;
+        line-height: 1.25;
+      }
+
+      .control-section,
+      .info-card {
+        padding: 15px 0 12px;
+        border-top: 1px solid var(--line);
+      }
+
+      .control-section h2,
+      .info-card h2,
+      .data-card h2 {
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.1;
+        font-weight: 800;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+      }
+
+      .slider-field,
+      .toggle-field {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 8px 10px;
+        width: 100%;
+        margin-top: 15px;
+        font-size: 13px;
+      }
+
+      .slider-field output {
+        min-width: 54px;
+        text-align: right;
+        color: var(--text);
+      }
+
+      .slider-field input {
+        grid-column: 1 / -1;
+        width: 100%;
+        margin: 0;
+      }
+
+      input[type="range"] {
+        --range-progress: 50%;
+        --slider-fill: var(--blue);
+        --slider-track: #191919;
+        appearance: none;
+        height: 22px;
+        background: transparent;
+        accent-color: var(--slider-fill);
+      }
+
+      input[type="range"]::-webkit-slider-runnable-track {
+        height: 6px;
+        border-radius: 8px;
+        background: linear-gradient(90deg, var(--slider-fill) 0%, var(--slider-fill) var(--range-progress), var(--slider-track) var(--range-progress), var(--slider-track) 100%);
+      }
+
+      input[type="range"]::-webkit-slider-thumb {
+        appearance: none;
+        width: 16px;
+        height: 16px;
+        margin-top: -5px;
+        border: 0;
+        border-radius: 8px;
+        background: var(--slider-fill);
+      }
+
+      input[type="range"]::-moz-range-track {
+        height: 6px;
+        border-radius: 8px;
+        background: var(--slider-track);
+      }
+
+      input[type="range"]::-moz-range-progress {
+        height: 6px;
+        border-radius: 8px;
+        background: var(--slider-fill);
+      }
+
+      input[type="range"]::-moz-range-thumb {
+        width: 16px;
+        height: 16px;
+        border: 0;
+        border-radius: 8px;
+        background: var(--slider-fill);
+      }
+
+      .toggle-field {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 34px;
+        padding: 0 2px;
+      }
+
+      .toggle-field input {
+        width: 34px;
+        height: 18px;
+        margin: 0;
+        appearance: none;
+        position: relative;
+        flex: 0 0 auto;
+        background: var(--control-bg);
+        border: 1px solid var(--field-border);
+        border-radius: 8px;
+      }
+
+      .toggle-field input::before {
+        content: "";
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 12px;
+        height: 12px;
+        border-radius: 8px;
+        background: var(--muted);
+        transition: transform 120ms ease, background 120ms ease;
+      }
+
+      .toggle-field input:checked {
+        background: var(--blue);
+      }
+
+      .toggle-field input:checked::before {
+        transform: translateX(16px);
+        background: var(--primary-button-text);
+      }
+
+      .primary-button,
+      .secondary-button {
+        width: 100%;
+        height: 44px;
+        border-radius: 8px;
+        font-weight: 700;
+      }
+
+      .primary-button {
+        margin: 12px 0 10px;
+        border: 0;
+        color: var(--primary-button-text);
+        background: var(--primary-gradient);
+        font-size: 16px;
+        box-shadow: var(--primary-shadow);
+      }
+
+      .secondary-button {
+        margin: 0 0 16px;
+        border: 1px solid var(--field-border);
+        color: var(--control-text);
+        background: var(--control-bg);
+        font-size: 14px;
+      }
+
+      .primary-button:hover {
+        background: var(--primary-gradient-hover);
+      }
+
+      .secondary-button:hover {
+        background: var(--control-bg-hover);
+      }
+
+      .info-card p {
+        margin: 10px 0 0;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.45;
+      }
+
+      .workspace {
+        min-width: 0;
+        height: 100vh;
+        padding: 18px;
+        overflow: hidden;
+        display: grid;
+        grid-template-rows: minmax(0, 1fr) var(--bottom-height);
+        gap: 18px;
+      }
+
+      .simulation-card,
+      .data-card {
+        overflow: hidden;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        box-shadow: var(--card-shadow);
+      }
+
+      .simulation-card {
+        min-height: 0;
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr);
+      }
+
+      .sim-header {
+        min-height: 68px;
+        padding: 14px 16px 12px;
+        border-bottom: 1px solid var(--subtle-line);
+      }
+
+      .header-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+        float: right;
+      }
+
+      .header-button {
+        min-width: 42px;
+        height: 36px;
+        padding: 0 12px;
+        border: 1px solid var(--field-border);
+        border-radius: 8px;
+        color: var(--control-text);
+        background: var(--control-bg);
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .header-button:hover {
+        background: var(--control-bg-hover);
+      }
+
+      .sim-header h2 {
+        margin: 0 0 4px;
+        font-size: 20px;
+        line-height: 1.15;
+      }
+
+      .sim-header p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .scene-frame {
+        position: relative;
+        min-height: 0;
+        background: var(--scene-bg);
+      }
+
+      #atomCanvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+        cursor: grab;
+        touch-action: none;
+      }
+
+      #atomCanvas:active {
+        cursor: grabbing;
+      }
+
+      .canvas-overlay {
+        position: absolute;
+        left: 16px;
+        bottom: 16px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        pointer-events: none;
+      }
+
+      .chip {
+        padding: 7px 10px;
+        border-radius: 8px;
+        color: var(--text);
+        background: color-mix(in srgb, var(--panel) 88%, transparent);
+        border: 1px solid var(--line);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .bottom-grid {
+        min-height: 0;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+      }
+
+      .data-card {
+        padding: 14px 16px;
+      }
+
+      .metrics-card {
+        min-height: 0;
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr);
+      }
+
+      .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 14px;
+        min-height: 0;
+        overflow-y: auto;
+        padding-right: 6px;
+      }
+
+      .metrics-grid::-webkit-scrollbar,
+      .sidebar::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .metrics-grid::-webkit-scrollbar-thumb,
+      .sidebar::-webkit-scrollbar-thumb {
+        background: var(--field-border);
+        border-radius: 8px;
+      }
+
+      .metrics-grid::-webkit-scrollbar-track,
+      .sidebar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      .metric {
+        min-width: 0;
+        padding: 11px 12px;
+        border-radius: 8px;
+        background: var(--field-bg);
+        border: 1px solid var(--subtle-line);
+      }
+
+      .metric span {
+        display: block;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .metric strong {
+        display: block;
+        margin-top: 4px;
+        font-size: 18px;
+        line-height: 1.15;
+      }
+
+      .chart-card {
+        min-height: 0;
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr) auto;
+        gap: 10px;
+      }
+
+      #radialChart {
+        display: block;
+        width: 100%;
+        height: 100%;
+        min-height: 96px;
+        border: 1px solid var(--subtle-line);
+        border-radius: 8px;
+        background: var(--field-bg);
+      }
+
+      .legend-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .swatch {
+        width: 11px;
+        height: 11px;
+        border-radius: 8px;
+        flex: 0 0 auto;
+      }
+
+      .electron { background: var(--canvas-electron); }
+      .nucleus { background: var(--canvas-nucleus); }
+      .chart { background: var(--canvas-chart); }
+
+      body[data-theme="dark"] .sidebar,
+      body[data-theme="dark"] .simulation-card,
+      body[data-theme="dark"] .data-card,
+      body[data-theme="dark"] .header-button {
+        border: 0;
+        background: var(--panel);
+        box-shadow: none;
+      }
+
+      body[data-theme="dark"] .secondary-button {
+        border: 0;
+        background: var(--control-bg);
+        box-shadow: none;
+      }
+
+      body[data-theme="dark"] .control-section,
+      body[data-theme="dark"] .info-card,
+      body[data-theme="dark"] .sim-header,
+      body[data-theme="dark"] .metric,
+      body[data-theme="dark"] #radialChart {
+        border-color: transparent;
+      }
+
+      body[data-theme="dark"] .header-button:hover,
+      body[data-theme="dark"] .secondary-button:hover {
+        color: var(--text);
+        background: var(--control-bg-hover);
+      }
+
+      @media (max-width: 1000px) {
+        .metrics-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 900px) {
+        html,
+        body {
+          overflow: auto;
+        }
+
+        .app-shell {
+          grid-template-columns: 1fr;
+          height: auto;
+          min-height: 100vh;
+        }
+
+        .sidebar {
+          height: auto;
+          border-right: 0;
+          border-bottom: 1px solid var(--line);
+        }
+
+        .workspace {
+          height: auto;
+          min-height: 760px;
+          grid-template-rows: minmax(520px, 66vh) auto;
+        }
+
+        .bottom-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body data-theme="light">
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Control panel">
+        <div class="sidebar-inner">
+          <header class="brand">
+            <h1>Atomic Orbital Playground</h1>
+            <p>Monte Carlo electron clouds from quantum numbers</p>
+          </header>
+
+          <section class="control-section">
+            <h2>QUANTUM STATE</h2>
+            <label class="slider-field" for="principalN">
+              <span>Principal number n</span>
+              <output id="principalNValue">3</output>
+              <input id="principalN" type="range" min="1" max="6" step="1" value="3">
+            </label>
+            <label class="slider-field" for="angularL">
+              <span>Angular number l</span>
+              <output id="angularLValue">1</output>
+              <input id="angularL" type="range" min="0" max="2" step="1" value="1">
+            </label>
+            <label class="slider-field" for="magneticM">
+              <span>Magnetic number m</span>
+              <output id="magneticMValue">0</output>
+              <input id="magneticM" type="range" min="-1" max="1" step="1" value="0">
+            </label>
+          </section>
+
+          <section class="control-section">
+            <h2>RENDERING</h2>
+            <label class="slider-field" for="sampleCount">
+              <span>Electron samples</span>
+              <output id="sampleCountValue">7000</output>
+              <input id="sampleCount" type="range" min="1500" max="15000" step="500" value="7000">
+            </label>
+            <label class="slider-field" for="cloudScale">
+              <span>Zoom level</span>
+              <output id="cloudScaleValue">58%</output>
+              <input id="cloudScale" type="range" min="20" max="180" step="1" value="58">
+            </label>
+            <label class="slider-field" for="rotationSpeed">
+              <span>Rotation speed</span>
+              <output id="rotationSpeedValue">3x</output>
+              <input id="rotationSpeed" type="range" min="0" max="8" step="1" value="3">
+            </label>
+            <label class="slider-field" for="electronSize">
+              <span>Electron size</span>
+              <output id="electronSizeValue">2px</output>
+              <input id="electronSize" type="range" min="1" max="4" step="0.5" value="2">
+            </label>
+          </section>
+
+          <section class="control-section">
+            <h2>VISUALS</h2>
+            <label class="toggle-field" for="axisToggle">
+              <span>Show 3D axes</span>
+              <input id="axisToggle" type="checkbox" checked>
+            </label>
+            <label class="toggle-field" for="shellToggle">
+              <span>Show probability shell</span>
+              <input id="shellToggle" type="checkbox" checked>
+            </label>
+          </section>
+
+          <button id="regenerateButton" class="primary-button" type="button">Regenerate orbital</button>
+          <button id="randomButton" class="secondary-button" type="button">Random quantum state</button>
+
+          <section class="info-card">
+            <h2>HOW IT WORKS</h2>
+            <p>The original C sampling idea is ported to JavaScript: we build radial and theta probability CDFs, sample electron positions, then render them as a rotating projected cloud.</p>
+          </section>
+        </div>
+      </aside>
+
+      <main class="workspace">
+        <section class="simulation-card">
+          <header class="sim-header">
+            <div class="header-actions">
+              <button id="pauseButton" class="header-button" type="button" aria-pressed="false">Pause</button>
+              <button id="themeToggle" class="header-button" type="button" aria-label="Enable dark mode" aria-pressed="false" title="Enable dark mode">☾</button>
+            </div>
+            <h2>Hydrogen-like Orbital</h2>
+            <p id="stateTitle">n=3 l=1 m=0 · 7000 samples</p>
+          </header>
+          <div class="scene-frame">
+            <canvas id="atomCanvas" aria-label="Atomic orbital simulation"></canvas>
+            <div class="canvas-overlay" aria-hidden="true">
+              <span class="chip">Radial CDF</span>
+              <span class="chip">Theta CDF</span>
+              <span class="chip">Drag to rotate</span>
+              <span class="chip">Wheel to zoom</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="bottom-grid">
+          <article class="data-card metrics-card">
+            <h2>METRICS</h2>
+            <div class="metrics-grid">
+              <div class="metric"><span>Principal n</span><strong id="nMetric">3</strong></div>
+              <div class="metric"><span>Angular l</span><strong id="lMetric">1</strong></div>
+              <div class="metric"><span>Magnetic m</span><strong id="mMetric">0</strong></div>
+              <div class="metric"><span>Samples</span><strong id="samplesMetric">7000</strong></div>
+              <div class="metric"><span>Energy</span><strong id="energyMetric">-1.51 eV</strong></div>
+              <div class="metric"><span>98% radius</span><strong id="radiusMetric">0 a0</strong></div>
+            </div>
+          </article>
+
+          <article class="data-card chart-card">
+            <h2>RADIAL DENSITY</h2>
+            <canvas id="radialChart" aria-label="Radial probability density"></canvas>
+            <div class="legend-row"><i class="swatch chart"></i><span>Probability density P(r) = r^2 |R(n,l,r)|^2</span></div>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      var atomCanvas = document.getElementById("atomCanvas");
+      var atomCtx = atomCanvas.getContext("2d");
+      var radialCanvas = document.getElementById("radialChart");
+      var radialCtx = radialCanvas.getContext("2d");
+      var particles = [];
+      var radialCache = {};
+      var thetaCache = {};
+      var orbitalState = null;
+      var paused = false;
+      var showAxes = true;
+      var showShell = true;
+      var yaw = -0.65;
+      var pitch = 0.36;
+      var drag = null;
+      var regenerateTimer = null;
+
+      var controls = {
+        principalN: document.getElementById("principalN"),
+        angularL: document.getElementById("angularL"),
+        magneticM: document.getElementById("magneticM"),
+        sampleCount: document.getElementById("sampleCount"),
+        cloudScale: document.getElementById("cloudScale"),
+        rotationSpeed: document.getElementById("rotationSpeed"),
+        electronSize: document.getElementById("electronSize"),
+        axisToggle: document.getElementById("axisToggle"),
+        shellToggle: document.getElementById("shellToggle"),
+        regenerateButton: document.getElementById("regenerateButton"),
+        randomButton: document.getElementById("randomButton"),
+        pauseButton: document.getElementById("pauseButton"),
+        themeToggle: document.getElementById("themeToggle"),
+        stateTitle: document.getElementById("stateTitle"),
+        nMetric: document.getElementById("nMetric"),
+        lMetric: document.getElementById("lMetric"),
+        mMetric: document.getElementById("mMetric"),
+        samplesMetric: document.getElementById("samplesMetric"),
+        energyMetric: document.getElementById("energyMetric"),
+        radiusMetric: document.getElementById("radiusMetric"),
+      };
+
+      function cssVar(name, fallback) {
+        return getComputedStyle(document.body).getPropertyValue(name).trim() || fallback;
+      }
+
+      function colorToRgba(value, alpha) {
+        if (value.indexOf("#") === 0) {
+          var hex = value.slice(1);
+          if (hex.length === 3) hex = hex.split("").map(function(item) { return item + item; }).join("");
+          var intValue = parseInt(hex, 16);
+          var red = (intValue >> 16) & 255;
+          var green = (intValue >> 8) & 255;
+          var blue = intValue & 255;
+          return "rgba(" + red + ", " + green + ", " + blue + ", " + alpha + ")";
+        }
+        if (value.indexOf("rgba") === 0) return value;
+        return value;
+      }
+
+      function mixHex(a, b, amount) {
+        var ca = parseHex(a);
+        var cb = parseHex(b);
+        var red = Math.round(ca.r + (cb.r - ca.r) * amount);
+        var green = Math.round(ca.g + (cb.g - ca.g) * amount);
+        var blue = Math.round(ca.b + (cb.b - ca.b) * amount);
+        return "rgb(" + red + ", " + green + ", " + blue + ")";
+      }
+
+      function parseHex(value) {
+        var hex = value.charAt(0) === "#" ? value.slice(1) : value;
+        if (hex.length !== 6) return { r: 22, g: 119, b: 232 };
+        var intValue = parseInt(hex, 16);
+        return { r: (intValue >> 16) & 255, g: (intValue >> 8) & 255, b: intValue & 255 };
+      }
+
+      function updateRangeFill(input) {
+        var min = Number(input.min || 0);
+        var max = Number(input.max || 100);
+        var value = Number(input.value || 0);
+        var progress = ((value - min) / Math.max(max - min, 1)) * 100;
+        input.style.setProperty("--range-progress", progress + "%");
+      }
+
+      function clamp(value, min, max) {
+        return Math.max(min, Math.min(max, value));
+      }
+
+      function factorial(value) {
+        var out = 1;
+        for (var i = 2; i <= value; i++) out *= i;
+        return out;
+      }
+
+      function laguerre(k, alpha, x) {
+        if (k === 0) return 1;
+        var prev = 1;
+        var current = 1 + alpha - x;
+        if (k === 1) return current;
+        for (var i = 2; i <= k; i++) {
+          var next = ((2 * i - 1 + alpha - x) * current - (i - 1 + alpha) * prev) / i;
+          prev = current;
+          current = next;
+        }
+        return current;
+      }
+
+      function associatedLegendre(l, m, x) {
+        var mAbs = Math.abs(m);
+        var pmm = 1;
+        if (mAbs > 0) {
+          var somx2 = Math.sqrt(Math.max(0, (1 - x) * (1 + x)));
+          var fact = 1;
+          for (var i = 1; i <= mAbs; i++) {
+            pmm *= -fact * somx2;
+            fact += 2;
+          }
+        }
+        if (l === mAbs) return pmm;
+        var pmmp1 = x * (2 * mAbs + 1) * pmm;
+        if (l === mAbs + 1) return pmmp1;
+        var pll = 0;
+        for (var ll = mAbs + 2; ll <= l; ll++) {
+          pll = ((2 * ll - 1) * x * pmmp1 - (ll + mAbs - 1) * pmm) / (ll - mAbs);
+          pmm = pmmp1;
+          pmmp1 = pll;
+        }
+        return pmmp1;
+      }
+
+      function radialAmplitude(n, l, r) {
+        var rho = (2 * r) / n;
+        var k = n - l - 1;
+        var alpha = 2 * l + 1;
+        var normalization = Math.sqrt(Math.pow(2 / n, 3) * factorial(n - l - 1) / (2 * n * factorial(n + l)));
+        return normalization * Math.exp(-rho / 2) * Math.pow(rho, l) * laguerre(k, alpha, rho);
+      }
+
+      function buildRadialDistribution(n, l) {
+        var key = n + ":" + l;
+        if (radialCache[key]) return radialCache[key];
+        var steps = 2048;
+        var rMax = Math.max(14, 10 * n * n);
+        var dr = rMax / (steps - 1);
+        var cdf = new Array(steps);
+        var pdf = new Array(steps);
+        var cumulative = 0;
+        for (var i = 0; i < steps; i++) {
+          var r = i * dr;
+          var amp = radialAmplitude(n, l, r);
+          var probability = r * r * amp * amp;
+          pdf[i] = probability;
+          cumulative += probability;
+          cdf[i] = cumulative;
+        }
+        for (var j = 0; j < steps; j++) cdf[j] /= cumulative;
+        var percentile98 = rMax;
+        for (var k = 0; k < steps; k++) {
+          if (cdf[k] >= 0.98) {
+            percentile98 = k * dr;
+            break;
+          }
+        }
+        radialCache[key] = { cdf: cdf, pdf: pdf, rMax: rMax, percentile98: percentile98 };
+        return radialCache[key];
+      }
+
+      function buildThetaDistribution(l, m) {
+        var mAbs = Math.abs(m);
+        var key = l + ":" + mAbs;
+        if (thetaCache[key]) return thetaCache[key];
+        var steps = 1024;
+        var cdf = new Array(steps);
+        var cumulative = 0;
+        for (var i = 0; i < steps; i++) {
+          var theta = (i * Math.PI) / (steps - 1);
+          var x = Math.cos(theta);
+          var legendre = associatedLegendre(l, mAbs, x);
+          cumulative += Math.sin(theta) * legendre * legendre;
+          cdf[i] = cumulative;
+        }
+        for (var j = 0; j < steps; j++) cdf[j] /= cumulative;
+        thetaCache[key] = { cdf: cdf };
+        return thetaCache[key];
+      }
+
+      function sampleIndex(cdf) {
+        var u = Math.random();
+        var low = 0;
+        var high = cdf.length - 1;
+        while (low < high) {
+          var mid = (low + high) >> 1;
+          if (cdf[mid] < u) low = mid + 1;
+          else high = mid;
+        }
+        return low;
+      }
+
+      function sampleRadius(distribution) {
+        var index = sampleIndex(distribution.cdf);
+        return (index * distribution.rMax) / (distribution.cdf.length - 1);
+      }
+
+      function sampleTheta(distribution) {
+        var index = sampleIndex(distribution.cdf);
+        return (index * Math.PI) / (distribution.cdf.length - 1);
+      }
+
+      function readState() {
+        var n = Number(controls.principalN.value);
+        controls.angularL.max = String(n - 1);
+        if (Number(controls.angularL.value) > n - 1) controls.angularL.value = String(n - 1);
+        var l = Number(controls.angularL.value);
+        controls.magneticM.min = String(-l);
+        controls.magneticM.max = String(l);
+        controls.magneticM.value = String(clamp(Number(controls.magneticM.value), -l, l));
+        var m = Number(controls.magneticM.value);
+
+        showAxes = controls.axisToggle.checked;
+        showShell = controls.shellToggle.checked;
+        document.getElementById("principalNValue").textContent = String(n);
+        document.getElementById("angularLValue").textContent = String(l);
+        document.getElementById("magneticMValue").textContent = String(m);
+        document.getElementById("sampleCountValue").textContent = controls.sampleCount.value;
+        document.getElementById("cloudScaleValue").textContent = controls.cloudScale.value + "%";
+        document.getElementById("rotationSpeedValue").textContent = controls.rotationSpeed.value + "x";
+        document.getElementById("electronSizeValue").textContent = controls.electronSize.value + "px";
+        [controls.principalN, controls.angularL, controls.magneticM, controls.sampleCount, controls.cloudScale, controls.rotationSpeed, controls.electronSize].forEach(updateRangeFill);
+        return { n: n, l: l, m: m, samples: Number(controls.sampleCount.value) };
+      }
+
+      function setZoomValue(value) {
+        var min = Number(controls.cloudScale.min);
+        var max = Number(controls.cloudScale.max);
+        controls.cloudScale.value = String(Math.round(clamp(value, min, max)));
+        readState();
+      }
+
+      function generateOrbital() {
+        var state = readState();
+        var radial = buildRadialDistribution(state.n, state.l);
+        var theta = buildThetaDistribution(state.l, state.m);
+        particles = [];
+        for (var i = 0; i < state.samples; i++) {
+          var r = sampleRadius(radial);
+          var t = sampleTheta(theta);
+          var p = Math.random() * Math.PI * 2;
+          var sinTheta = Math.sin(t);
+          particles.push({
+            x: r * sinTheta * Math.cos(p),
+            y: r * Math.cos(t),
+            z: r * sinTheta * Math.sin(p),
+            r: r,
+          });
+        }
+        orbitalState = { n: state.n, l: state.l, m: state.m, samples: state.samples, radial: radial };
+        updateMetrics();
+        drawRadialChart();
+      }
+
+      function scheduleRegenerate() {
+        clearTimeout(regenerateTimer);
+        regenerateTimer = setTimeout(generateOrbital, 90);
+      }
+
+      function resizeCanvas(canvas, ctx) {
+        var rect = canvas.getBoundingClientRect();
+        var ratio = window.devicePixelRatio || 1;
+        var targetWidth = Math.max(1, Math.floor(rect.width * ratio));
+        var targetHeight = Math.max(1, Math.floor(rect.height * ratio));
+        if (canvas.width !== targetWidth || canvas.height !== targetHeight) {
+          canvas.width = targetWidth;
+          canvas.height = targetHeight;
+        }
+        ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+        return rect;
+      }
+
+      function projectPoint(point, scale, centerX, centerY) {
+        var cosY = Math.cos(yaw);
+        var sinY = Math.sin(yaw);
+        var cosX = Math.cos(pitch);
+        var sinX = Math.sin(pitch);
+        var x1 = point.x * cosY - point.z * sinY;
+        var z1 = point.x * sinY + point.z * cosY;
+        var y1 = point.y * cosX - z1 * sinX;
+        var z2 = point.y * sinX + z1 * cosX;
+        var perspective = 700 / (700 + z2 * scale * 0.18);
+        return {
+          x: centerX + x1 * scale * perspective,
+          y: centerY + y1 * scale * perspective,
+          z: z2,
+          perspective: perspective,
+        };
+      }
+
+      function drawGrid(ctx, rect) {
+        ctx.fillStyle = cssVar("--canvas-bg", "#ffffff");
+        ctx.fillRect(0, 0, rect.width, rect.height);
+        ctx.strokeStyle = cssVar("--canvas-grid", "#d8dee8");
+        ctx.lineWidth = 1;
+        for (var x = 0; x <= rect.width; x += 48) {
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, rect.height);
+          ctx.stroke();
+        }
+        for (var y = 0; y <= rect.height; y += 48) {
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(rect.width, y);
+          ctx.stroke();
+        }
+      }
+
+      function drawAxes(ctx, centerX, centerY, scale) {
+        if (!showAxes || !orbitalState) return;
+        var axisLength = orbitalState.radial.percentile98 * 0.72;
+        var origin = projectPoint({ x: 0, y: 0, z: 0 }, scale, centerX, centerY);
+        var axes = [
+          { label: "x", color: cssVar("--canvas-electron", "#1677e8"), point: { x: axisLength, y: 0, z: 0 } },
+          { label: "y", color: cssVar("--canvas-chart", "#e87511"), point: { x: 0, y: axisLength, z: 0 } },
+          { label: "z", color: cssVar("--canvas-nucleus", "#EB5757"), point: { x: 0, y: 0, z: axisLength } },
+        ];
+        ctx.font = "12px Inter, system-ui, sans-serif";
+        ctx.lineWidth = 1.4;
+        for (var i = 0; i < axes.length; i++) {
+          var end = projectPoint(axes[i].point, scale, centerX, centerY);
+          ctx.strokeStyle = colorToRgba(axes[i].color, 0.65);
+          ctx.beginPath();
+          ctx.moveTo(origin.x, origin.y);
+          ctx.lineTo(end.x, end.y);
+          ctx.stroke();
+          ctx.fillStyle = axes[i].color;
+          ctx.fillText(axes[i].label, end.x + 5, end.y + 4);
+        }
+      }
+
+      function drawShell(ctx, centerX, centerY, scale) {
+        if (!showShell || !orbitalState) return;
+        var radius = orbitalState.radial.percentile98 * scale;
+        ctx.save();
+        ctx.strokeStyle = cssVar("--canvas-shell", "rgba(22, 119, 232, 0.16)");
+        ctx.lineWidth = 1.2;
+        ctx.setLineDash([6, 7]);
+        ctx.beginPath();
+        ctx.ellipse(centerX, centerY, radius, radius * Math.cos(pitch) * 0.72, yaw, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.ellipse(centerX, centerY, radius * 0.62, radius * 0.62 * Math.cos(pitch) * 0.72, -yaw, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      function drawNucleus(ctx, centerX, centerY, scale) {
+        var nucleus = projectPoint({ x: 0, y: 0, z: 0 }, scale, centerX, centerY);
+        var gradient = ctx.createRadialGradient(nucleus.x, nucleus.y, 1, nucleus.x, nucleus.y, 16);
+        gradient.addColorStop(0, colorToRgba(cssVar("--canvas-nucleus", "#EB5757"), 0.95));
+        gradient.addColorStop(1, colorToRgba(cssVar("--canvas-nucleus", "#EB5757"), 0));
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(nucleus.x, nucleus.y, 16, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = cssVar("--canvas-nucleus", "#EB5757");
+        ctx.beginPath();
+        ctx.arc(nucleus.x, nucleus.y, 4.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      function drawParticles(ctx, centerX, centerY, scale) {
+        if (!orbitalState) return;
+        var projections = new Array(particles.length);
+        for (var i = 0; i < particles.length; i++) {
+          var projected = projectPoint(particles[i], scale, centerX, centerY);
+          projected.r = particles[i].r;
+          projections[i] = projected;
+        }
+        projections.sort(function(a, b) { return a.z - b.z; });
+        var baseColor = cssVar("--canvas-electron", "#1677e8");
+        var hotColor = cssVar("--canvas-electron-hot", "#e87511");
+        var radiusLimit = Math.max(1, orbitalState.radial.percentile98);
+        var dotSize = Number(controls.electronSize.value);
+        for (var j = 0; j < projections.length; j++) {
+          var p = projections[j];
+          var depth = clamp((p.z / radiusLimit + 1) / 2, 0, 1);
+          var alpha = 0.12 + depth * 0.46;
+          var colorMix = clamp(p.r / radiusLimit, 0, 1);
+          ctx.fillStyle = colorToRgba(mixHex(baseColor, hotColor, colorMix * 0.55), alpha);
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, dotSize * p.perspective, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      function drawScene() {
+        var rect = resizeCanvas(atomCanvas, atomCtx);
+        if (!paused) yaw += Number(controls.rotationSpeed.value) * 0.0018;
+        drawGrid(atomCtx, rect);
+        if (!orbitalState) {
+          requestAnimationFrame(drawScene);
+          return;
+        }
+        var centerX = rect.width * 0.5;
+        var centerY = rect.height * 0.5;
+        var radius = Math.max(orbitalState.radial.percentile98, 1);
+        var scale = (Math.min(rect.width, rect.height) * Number(controls.cloudScale.value)) / (radius * 210);
+        drawShell(atomCtx, centerX, centerY, scale);
+        drawAxes(atomCtx, centerX, centerY, scale);
+        drawParticles(atomCtx, centerX, centerY, scale);
+        drawNucleus(atomCtx, centerX, centerY, scale);
+        requestAnimationFrame(drawScene);
+      }
+
+      function drawRadialChart() {
+        if (!orbitalState) return;
+        var rect = resizeCanvas(radialCanvas, radialCtx);
+        radialCtx.clearRect(0, 0, rect.width, rect.height);
+        radialCtx.fillStyle = cssVar("--field-bg", "#ffffff");
+        radialCtx.fillRect(0, 0, rect.width, rect.height);
+        var padding = 14;
+        var chartWidth = Math.max(1, rect.width - padding * 2);
+        var chartHeight = Math.max(1, rect.height - padding * 2);
+        radialCtx.strokeStyle = cssVar("--canvas-grid", "#d8dee8");
+        radialCtx.lineWidth = 1;
+        radialCtx.globalAlpha = 0.65;
+        for (var lineIndex = 0; lineIndex <= 3; lineIndex++) {
+          var y = padding + (chartHeight * lineIndex) / 3;
+          radialCtx.beginPath();
+          radialCtx.moveTo(padding, y);
+          radialCtx.lineTo(rect.width - padding, y);
+          radialCtx.stroke();
+        }
+        radialCtx.globalAlpha = 1;
+
+        var pdf = orbitalState.radial.pdf;
+        var maxValue = 0;
+        for (var i = 0; i < pdf.length; i++) maxValue = Math.max(maxValue, pdf[i]);
+        radialCtx.strokeStyle = cssVar("--canvas-chart", "#e87511");
+        radialCtx.lineWidth = 2;
+        radialCtx.beginPath();
+        for (var j = 0; j < pdf.length; j++) {
+          var x = padding + (chartWidth * j) / Math.max(1, pdf.length - 1);
+          var curveY = padding + chartHeight - (chartHeight * pdf[j]) / Math.max(maxValue, 1e-9);
+          if (j === 0) radialCtx.moveTo(x, curveY);
+          else radialCtx.lineTo(x, curveY);
+        }
+        radialCtx.stroke();
+        radialCtx.fillStyle = cssVar("--muted", "#4b5563");
+        radialCtx.font = "11px Inter, system-ui, sans-serif";
+        radialCtx.fillText("0", padding, rect.height - 6);
+        radialCtx.fillText(orbitalState.radial.rMax.toFixed(0) + " a0", rect.width - 58, rect.height - 6);
+      }
+
+      function updateMetrics() {
+        if (!orbitalState) return;
+        var energy = -13.6 / (orbitalState.n * orbitalState.n);
+        controls.stateTitle.textContent = "n=" + orbitalState.n + " l=" + orbitalState.l + " m=" + orbitalState.m + " · " + orbitalState.samples + " samples";
+        controls.nMetric.textContent = String(orbitalState.n);
+        controls.lMetric.textContent = String(orbitalState.l);
+        controls.mMetric.textContent = String(orbitalState.m);
+        controls.samplesMetric.textContent = String(orbitalState.samples);
+        controls.energyMetric.textContent = energy.toFixed(2) + " eV";
+        controls.radiusMetric.textContent = orbitalState.radial.percentile98.toFixed(1) + " a0";
+      }
+
+      function applyTheme(theme) {
+        document.body.dataset.theme = theme === "dark" ? "dark" : "light";
+        var isDark = document.body.dataset.theme === "dark";
+        controls.themeToggle.textContent = isDark ? "☀" : "☾";
+        controls.themeToggle.title = isDark ? "Enable light mode" : "Enable dark mode";
+        controls.themeToggle.setAttribute("aria-label", controls.themeToggle.title);
+        controls.themeToggle.setAttribute("aria-pressed", String(isDark));
+        localStorage.setItem("atom-playground-theme", document.body.dataset.theme);
+        drawRadialChart();
+      }
+
+      function toggleTheme() {
+        applyTheme(document.body.dataset.theme === "dark" ? "light" : "dark");
+      }
+
+      function randomState() {
+        var n = 1 + Math.floor(Math.random() * 6);
+        var l = Math.floor(Math.random() * n);
+        var m = -l + Math.floor(Math.random() * (2 * l + 1));
+        controls.principalN.value = String(n);
+        controls.angularL.value = String(l);
+        controls.magneticM.value = String(m);
+        generateOrbital();
+      }
+
+      [controls.principalN, controls.angularL, controls.magneticM, controls.sampleCount].forEach(function(input) {
+        input.addEventListener("input", function() {
+          readState();
+          scheduleRegenerate();
+        });
+      });
+
+      [controls.cloudScale, controls.rotationSpeed, controls.electronSize].forEach(function(input) {
+        input.addEventListener("input", readState);
+      });
+
+      controls.axisToggle.addEventListener("change", readState);
+      controls.shellToggle.addEventListener("change", readState);
+      controls.regenerateButton.addEventListener("click", generateOrbital);
+      controls.randomButton.addEventListener("click", randomState);
+      controls.pauseButton.addEventListener("click", function() {
+        paused = !paused;
+        controls.pauseButton.textContent = paused ? "Resume" : "Pause";
+        controls.pauseButton.setAttribute("aria-pressed", String(paused));
+      });
+      controls.themeToggle.addEventListener("click", toggleTheme);
+
+      atomCanvas.addEventListener("pointerdown", function(event) {
+        drag = { x: event.clientX, y: event.clientY, yaw: yaw, pitch: pitch };
+        atomCanvas.setPointerCapture(event.pointerId);
+      });
+
+      atomCanvas.addEventListener("pointermove", function(event) {
+        if (!drag) return;
+        yaw = drag.yaw + (event.clientX - drag.x) * 0.008;
+        pitch = clamp(drag.pitch + (event.clientY - drag.y) * 0.008, -1.2, 1.2);
+      });
+
+      atomCanvas.addEventListener("pointerup", function() { drag = null; });
+      atomCanvas.addEventListener("pointercancel", function() { drag = null; });
+
+      atomCanvas.addEventListener("wheel", function(event) {
+        event.preventDefault();
+        setZoomValue(Number(controls.cloudScale.value) - event.deltaY * 0.08);
+      }, { passive: false });
+
+      atomCanvas.addEventListener("dblclick", function() {
+        setZoomValue(58);
+      });
+
+      window.addEventListener("resize", function() {
+        drawRadialChart();
+      });
+
+      readState();
+      applyTheme(localStorage.getItem("atom-playground-theme") || "light");
+      generateOrbital();
+      drawScene();
+    </script>
+  </body>
+</html>
